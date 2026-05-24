@@ -1,1 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#fdf6ec;--warm-white:#fffdf9;
+  --terracotta:#c85a17;--terracotta-dark:#a84810;--terracotta-light:#f2d16b;
+  --bark:#6b4c2a;--bark-light:#9b7a50;
+  --sage-light:#e8f0e9;--parchment:#f5ede0;
+  --ink:#2c1a0e;--muted:#8a7060;--border:#e0cebc;--card-bg:#fffdf9;
+  --danger:#c0392b;--danger-light:#fdf0ef;--danger-border:#e8b4b0;
+  --admin-bg:#fef3e2;--admin-border:#e8a838;--admin-text:#7a4d0a;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:15px}
+h1,h2,h3{font-family:'Lora',serif}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
 
+#screen-login{align-items:center;justify-content:center;background:var(--cream);background-image:repeating-linear-gradient(45deg,rgba(200,90,23,0.03) 0,rgba(200,90,23,0.03) 1px,transparent 0,transparent 50%);background-size:28px 28px}
+.login-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:100%;max-width:400px}
+.login-icon{width:60px;height:60px;background:var(--terracotta-light);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 24px}
+.login-card h1{text-align:center;font-size:1.6rem;color:var(--bark);margin-bottom:6px}
+.login-card>p{text-align:center;color:var(--muted);font-size:14px;margin-bottom:32px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--bark);margin-bottom:6px}
+.field input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;background:var(--cream);color:var(--ink);outline:none;transition:border 0.2s}
+.field input:focus{border-color:var(--terracotta)}
+.btn-primary{width:100%;padding:13px;background:var(--terracotta);color:white;border:none;border-radius:10px;font-family:'Lora',serif;font-size:16px;cursor:pointer;transition:background 0.2s}
+.btn-primary:hover{background:var(--terracotta-dark)}
+.login-error{color:var(--danger);font-size:13px;text-align:center;margin-top:12px;display:none}
+.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:16px}
+
+.topbar{background:var(--card-bg);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-logo{width:32px;height:32px;background:var(--terracotta-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.topbar-name{font-family:'Lora',serif;font-size:1.1rem;color:var(--bark)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.back-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:6px}
+.back-btn:hover{border-color:var(--bark-light);color:var(--bark)}
+.admin-badge{background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:var(--admin-text);display:none;align-items:center;gap:5px}
+.admin-badge.visible{display:flex}
+.switch-admin-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;font-family:'DM Sans',sans-serif;padding:0}
+.switch-admin-btn:hover{color:var(--bark)}
+.exit-admin-btn{background:none;border:none;cursor:pointer;color:var(--admin-text);font-size:12px;font-family:'DM Sans',sans-serif;margin-left:4px;opacity:0.7}
+.exit-admin-btn:hover{opacity:1}
+.logout-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;font-family:'DM Sans',sans-serif}
+.logout-btn:hover{color:var(--terracotta)}
+.topbar-sep{color:var(--border);font-size:16px}
+
+.app-content{flex:1;padding:28px 24px;max-width:680px;margin:0 auto;width:100%}
+
+.welcome-block{margin-bottom:32px}
+.welcome-block .greeting{font-size:1.05rem;color:var(--muted);margin-bottom:4px}
+.welcome-block h2{font-size:1.9rem;color:var(--bark)}
+.welcome-block .address-pill{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:var(--muted);background:var(--parchment);border-radius:20px;padding:4px 12px}
+
+.admin-banner{background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:12px;padding:12px 16px;margin-bottom:24px;display:none;align-items:center;gap:10px;font-size:13px;color:var(--admin-text)}
+.admin-banner.visible{display:flex}
+.admin-banner strong{font-weight:500}
+
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tile{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:28px 24px;cursor:pointer;transition:transform 0.15s,border-color 0.15s;text-align:left}
+.tile:hover{transform:translateY(-2px);border-color:var(--bark-light)}
+.tile-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.tile-icon.rules-icon{background:#fef3e2}
+.tile-icon.tasks-icon{background:var(--sage-light)}
+.tile h3{font-size:1.15rem;color:var(--bark);margin-bottom:6px}
+.tile p{font-size:13px;color:var(--muted);line-height:1.5}
+.tile-arrow{margin-top:16px;color:var(--terracotta);font-size:18px}
+
+.screen-header{margin-bottom:28px}
+.screen-header h2{font-size:1.7rem;color:var(--bark)}
+.screen-header p{font-size:14px;color:var(--muted);margin-top:4px}
+
+.categories-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.category-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:12px}
+.category-card:hover{border-color:var(--bark-light);transform:translateY(-1px)}
+.cat-icon{font-size:22px;flex-shrink:0}
+.cat-info{flex:1;min-width:0}
+.cat-info h4{font-size:15px;color:var(--bark);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-info span{font-size:12px;color:var(--muted)}
+.cat-actions{display:none;align-items:center;gap:4px;flex-shrink:0}
+.is-admin .cat-actions{display:flex}
+.cat-nav-arrow{color:var(--muted);font-size:16px;flex-shrink:0}
+.is-admin .cat-nav-arrow{display:none}
+.icon-btn{background:none;border:none;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:all 0.15s;flex-shrink:0}
+.icon-btn:hover{background:var(--parchment);color:var(--bark)}
+.icon-btn.danger:hover{background:var(--danger-light);color:var(--danger)}
+
+.add-dashed-btn{margin-top:14px;width:100%;background:none;border:1.5px dashed var(--border);border-radius:14px;padding:15px;font-size:14px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.add-dashed-btn:hover{border-color:var(--terracotta);color:var(--terracotta)}
+.admin-only{display:none!important}
+.is-admin .admin-only{display:flex!important}
+
+.rules-list{display:flex;flex-direction:column;gap:10px}
+.rule-item{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.rule-bullet{width:8px;height:8px;border-radius:50%;background:var(--terracotta);flex-shrink:0;margin-top:6px}
+.rule-text{font-size:14px;color:var(--ink);line-height:1.55;flex:1}
+.rule-btns{display:none;align-items:center;gap:2px;flex-shrink:0;margin-top:-2px}
+.is-admin .rule-btns{display:flex}
+
+.tasks-list{display:flex;flex-direction:column;gap:12px}
+.task-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color 0.15s}
+.task-card:hover{border-color:var(--bark-light)}
+.task-card-header{padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer}
+.task-icon{width:42px;height:42px;border-radius:10px;background:var(--sage-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.task-info h4{font-size:15px;color:var(--bark);font-weight:500}
+.task-info span{font-size:12px;color:var(--muted)}
+.task-chevron{margin-left:auto;color:var(--muted);font-size:18px}
+
+.sweep-module{background:var(--parchment);border-top:1px solid var(--border);padding:20px;display:none}
+.sweep-display{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.sweep-display p{font-size:13px;color:var(--muted);margin-bottom:4px}
+.sweep-display h3{font-family:'Lora',serif;font-size:1.4rem;color:var(--bark)}
+.sweep-display .deadline{font-size:13px;color:var(--muted);margin-top:6px}
+.overdue-tag{display:inline-block;margin-left:8px;padding:1px 7px;border:1.5px solid var(--danger);border-radius:4px;color:var(--danger);font-size:11px;font-weight:600;letter-spacing:0.5px}
+.sweep-btn{padding:9px 18px;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+.sweep-btn-primary{background:var(--terracotta);color:white;border:none}
+.sweep-btn-primary:hover{background:var(--terracotta-dark)}
+.sweep-btn-secondary{background:none;border:1px solid var(--border);color:var(--muted)}
+.sweep-btn-secondary:hover{border-color:var(--bark-light);color:var(--bark)}
+.sweep-date-row{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.sweep-date-row input[type=date]{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none}
+.sweep-date-row input[type=date]:focus{border-color:var(--terracotta)}
+.sweep-loading{color:var(--muted);font-size:14px;padding:8px 0}
+
+.modal-wrap{display:none;align-items:flex-start;justify-content:center;padding:40px 20px;background:rgba(44,26,14,0.35);min-height:300px}
+.modal-wrap.open{display:flex}
+.modal{background:var(--card-bg);border-radius:16px;padding:28px;width:100%;max-width:420px}
+.modal h3{font-family:'Lora',serif;font-size:1.2rem;color:var(--bark);margin-bottom:6px}
+.modal>p{font-size:13px;color:var(--muted);margin-bottom:20px}
+.modal .field input{background:var(--warm-white)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.modal-btn{padding:9px 20px;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;border:none}
+.modal-btn-cancel{background:none;border:1px solid var(--border);color:var(--muted)}
+.modal-btn-cancel:hover{border-color:var(--bark-light);color:var(--bark)}
+.modal-btn-save{background:var(--terracotta);color:white}
+.modal-btn-save:hover{background:var(--terracotta-dark)}
+.modal-btn-danger{background:var(--danger);color:white}
+.modal-btn-danger:hover{background:#a93226}
+.modal-error{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+.confirm-msg{background:var(--danger-light);border:1px solid var(--danger-border);border-radius:10px;padding:14px;font-size:14px;color:#7a2020;line-height:1.5;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-icon">🏠</div>
+    <h1>Home Manager</h1>
+    <p>Sign in with your household address</p>
+    <div class="field"><label>Address</label><input type="text" id="login-address" placeholder="e.g. 42 Maple Street" autocomplete="off"></div>
+    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="Household password"></div>
+    <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-hint">First time? Any address and password will create your household.</div>
+  </div>
+</div>
+
+<div id="screen-app" class="screen" style="flex-direction:column">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">🏠</div>
+      <span class="topbar-name" id="topbar-name">Home Manager</span>
+    </div>
+    <div class="topbar-right">
+      <button class="back-btn" id="back-btn" onclick="goBack()">← Back</button>
+      <div class="admin-badge" id="admin-badge">🔑 Admin <button class="exit-admin-btn" onclick="exitAdmin()">✕</button></div>
+      <button class="switch-admin-btn" id="switch-admin-btn" onclick="openAdminModal()">Admin</button>
+      <span class="topbar-sep">|</span>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div id="view-dashboard" class="app-content">
+    <div class="admin-banner" id="admin-banner">
+      <span>🔑</span><span><strong>Admin mode active.</strong> You can add and edit household content.</span>
+    </div>
+    <div class="welcome-block">
+      <p class="greeting">Good <span id="time-greeting">day</span>,</p>
+      <h2 id="welcome-address">Home</h2>
+      <div class="address-pill">🏡 <span id="address-display"></span></div>
+    </div>
+    <div class="tiles">
+      <div class="tile" onclick="showView('view-rules')">
+        <div class="tile-icon rules-icon">📋</div>
+        <h3>House Rules</h3>
+        <p>Browse rules by category for your household</p>
+        <div class="tile-arrow">→</div>
+      </div>
+      <div class="tile" onclick="showView('view-tasks')">
+        <div class="tile-icon tasks-icon">✅</div>
+        <h3>Tasks</h3>
+        <p>Shared tasks and rotas for your household</p>
+        <div class="tile-arrow">→</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-rules" class="app-content" style="display:none">
+    <div class="screen-header">
+      <h2>House Rules</h2>
+      <p>Select a category to see its rules</p>
+    </div>
+    <div class="categories-grid" id="categories-grid"></div>
+    <button class="add-dashed-btn admin-only" onclick="openAddCategory()">+ Add category</button>
+  </div>
+
+  <div id="view-rules-list" class="app-content" style="display:none">
+    <div class="screen-header">
+      <h2 id="rules-list-title">Rules</h2>
+      <p id="rules-list-subtitle"></p>
+    </div>
+    <div class="rules-list" id="rules-list"></div>
+    <button class="add-dashed-btn admin-only" style="border-radius:12px;padding:14px" onclick="openAddRule()">+ Add rule</button>
+  </div>
+
+  <div id="view-tasks" class="app-content" style="display:none">
+    <div class="screen-header">
+      <h2>Tasks</h2>
+      <p>Household tasks and rotas</p>
+    </div>
+    <div class="tasks-list" id="tasks-list"></div>
+  </div>
+</div>
+
+<!-- Admin login -->
+<div class="modal-wrap" id="modal-admin">
+  <div class="modal">
+    <h3 id="modal-admin-title">Enter admin mode</h3>
+    <p id="modal-admin-desc">Enter the admin password to make changes.</p>
+    <div class="field"><label id="modal-admin-label">Admin password</label><input type="password" id="admin-password-input" placeholder="Admin password"></div>
+    <div class="modal-error" id="modal-admin-error">Incorrect admin password.</div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="modal-btn modal-btn-save" onclick="submitAdminPassword()">Enter admin mode</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / rename category -->
+<div class="modal-wrap" id="modal-category">
+  <div class="modal">
+    <h3 id="modal-cat-title">New category</h3>
+    <p id="modal-cat-desc">Give this category a name and an emoji</p>
+    <div class="field"><label>Category name</label><input type="text" id="cat-name-input" placeholder="e.g. Kitchen, Guests…"></div>
+    <div class="field"><label>Emoji</label><input type="text" id="cat-emoji-input" placeholder="🍳" maxlength="4" style="width:80px"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="modal-btn modal-btn-save" id="modal-cat-save-btn" onclick="saveCategory()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete category confirm -->
+<div class="modal-wrap" id="modal-delete-cat">
+  <div class="modal">
+    <h3>Delete category</h3>
+    <p>This cannot be undone.</p>
+    <div class="confirm-msg" id="delete-cat-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteCategory()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / edit rule -->
+<div class="modal-wrap" id="modal-rule">
+  <div class="modal">
+    <h3 id="modal-rule-title">New rule</h3>
+    <p id="modal-rule-desc"></p>
+    <div class="field"><label>Rule</label><input type="text" id="rule-text-input" placeholder="e.g. Clean up immediately after cooking"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="modal-btn modal-btn-save" id="modal-rule-save-btn" onclick="saveRule()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete rule confirm -->
+<div class="modal-wrap" id="modal-delete-rule">
+  <div class="modal">
+    <h3>Delete rule</h3>
+    <p>This cannot be undone.</p>
+    <div class="confirm-msg" id="delete-rule-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteRule()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SWEEP_API='https://sweep-rotator-backend.onrender.com/api';
+const sweepNames=['Ahmed','Asif','Faisal','Imran','Richard'];
+
+let currentHousehold=null,isAdmin=false,currentView='view-dashboard',viewHistory=[],currentCategoryIndex=null,sweepData=null;
+let editCatIndex=null,editRuleIndex=null,pendingDeleteCat=null,pendingDeleteRule=null;
+
+function storeKey(k){return`hm:${currentHousehold}:${k}`}
+function loadStore(k){try{return JSON.parse(localStorage.getItem(storeKey(k)))}catch(e){return null}}
+function saveStore(k,v){localStorage.setItem(storeKey(k),JSON.stringify(v))}
+function getHouseholds(){try{return JSON.parse(localStorage.getItem('hm:households'))||{}}catch(e){return{}}}
+function saveHouseholds(h){localStorage.setItem('hm:households',JSON.stringify(h))}
+
+/* ── LOGIN ── */
+function doLogin(){
+  const addr=document.getElementById('login-address').value.trim().toLowerCase();
+  const pass=document.getElementById('login-password').value;
+  if(!addr||!pass){showLoginError('Please fill in both fields.');return}
+  const hh=getHouseholds();
+  if(!hh[addr]){hh[addr]={password:pass,adminPassword:null};saveHouseholds(hh)}
+  else if(hh[addr].password!==pass){showLoginError('Incorrect address or password.');return}
+  currentHousehold=addr;isAdmin=false;
+  document.getElementById('login-error').style.display='none';
+  initApp();
+}
+function showLoginError(msg){const el=document.getElementById('login-error');el.textContent=msg;el.style.display='block'}
+function doLogout(){currentHousehold=null;isAdmin=false;viewHistory=[];document.getElementById('login-address').value='';document.getElementById('login-password').value='';showScreen('screen-login')}
+document.getElementById('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+/* ── SCREENS / VIEWS ── */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showView(id,push=true){
+  if(push&&currentView!==id)viewHistory.push(currentView);
+  document.querySelectorAll('#screen-app .app-content').forEach(v=>v.style.display='none');
+  document.getElementById(id).style.display='';
+  currentView=id;
+  document.getElementById('back-btn').style.display=viewHistory.length?'flex':'none';
+  if(id==='view-rules')renderCategories();
+  if(id==='view-tasks')renderTasks();
+}
+function goBack(){if(!viewHistory.length)return;showView(viewHistory.pop(),false)}
+
+/* ── ADMIN ── */
+function applyAdminClass(){
+  document.getElementById('screen-app').classList.toggle('is-admin',isAdmin);
+  document.getElementById('admin-badge').classList.toggle('visible',isAdmin);
+  document.getElementById('admin-banner').classList.toggle('visible',isAdmin);
+  document.getElementById('switch-admin-btn').style.display=isAdmin?'none':'block';
+}
+function exitAdmin(){isAdmin=false;applyAdminClass();if(currentView==='view-rules')renderCategories();if(currentView==='view-rules-list')renderRules(currentCategoryIndex)}
+function openAdminModal(){
+  const hh=getHouseholds();const has=hh[currentHousehold]?.adminPassword;
+  document.getElementById('modal-admin-title').textContent=has?'Enter admin mode':'Set up admin mode';
+  document.getElementById('modal-admin-desc').textContent=has?'Enter the admin password to make changes.':'No admin password set yet — create one now.';
+  document.getElementById('modal-admin-label').textContent=has?'Admin password':'Create admin password';
+  document.getElementById('admin-password-input').value='';
+  document.getElementById('modal-admin-error').style.display='none';
+  document.getElementById('modal-admin').classList.add('open');
+  setTimeout(()=>document.getElementById('admin-password-input').focus(),100);
+}
+function submitAdminPassword(){
+  const pw=document.getElementById('admin-password-input').value;if(!pw)return;
+  const hh=getHouseholds();const entry=hh[currentHousehold];
+  if(!entry.adminPassword){entry.adminPassword=pw;saveHouseholds(hh);isAdmin=true;closeModals();applyAdminClass();if(currentView==='view-rules')renderCategories();if(currentView==='view-rules-list')renderRules(currentCategoryIndex);return}
+  if(entry.adminPassword!==pw){document.getElementById('modal-admin-error').style.display='block';document.getElementById('admin-password-input').value='';document.getElementById('admin-password-input').focus();return}
+  isAdmin=true;closeModals();applyAdminClass();if(currentView==='view-rules')renderCategories();if(currentView==='view-rules-list')renderRules(currentCategoryIndex);
+}
+document.getElementById('admin-password-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitAdminPassword()});
+
+/* ── INIT ── */
+function initApp(){
+  const display=currentHousehold.replace(/\b\w/g,c=>c.toUpperCase());
+  document.getElementById('topbar-name').textContent=display;
+  document.getElementById('welcome-address').textContent=display;
+  document.getElementById('address-display').textContent=currentHousehold;
+  const h=new Date().getHours();
+  document.getElementById('time-greeting').textContent=h<12?'morning':h<17?'afternoon':'evening';
+  showScreen('screen-app');viewHistory=[];showView('view-dashboard',false);applyAdminClass();ensureDefaultData();
+}
+function ensureDefaultData(){
+  if(!loadStore('categories')){
+    saveStore('categories',[
+      {name:'Kitchen',emoji:'🍳',rules:['Clean up immediately after cooking','Label your food in the fridge']},
+      {name:'Guests',emoji:'🛋️',rules:['Let housemates know 24hrs before guests stay','Guests must not use others\' food']},
+      {name:'Bathrooms',emoji:'🚿',rules:['Keep surfaces clear and clean','Replace empty toilet rolls immediately']},
+      {name:'Garage',emoji:'🚗',rules:['Keep walkways clear at all times','Log any shared equipment you take']},
+    ]);
+  }
+}
+
+/* ── CATEGORIES ── */
+function renderCategories(){
+  const cats=loadStore('categories')||[];
+  document.getElementById('categories-grid').innerHTML=cats.length
+    ? cats.map((c,i)=>`
+      <div class="category-card" onclick="handleCatClick(event,${i})">
+        <div class="cat-icon">${c.emoji||'📁'}</div>
+        <div class="cat-info"><h4>${c.name}</h4><span>${c.rules.length} rule${c.rules.length!==1?'s':''}</span></div>
+        <div class="cat-actions">
+          <button class="icon-btn" title="Rename" onclick="openRenameCategory(event,${i})">✏️</button>
+          <button class="icon-btn danger" title="Delete" onclick="openDeleteCategory(event,${i})">🗑</button>
+        </div>
+        <div class="cat-nav-arrow">›</div>
+      </div>`).join('')
+    : `<p style="color:var(--muted);font-size:14px;grid-column:1/-1">No categories yet. Add one below.</p>`;
+}
+
+function handleCatClick(e,i){
+  if(e.target.closest('.cat-actions'))return;
+  openCategory(i);
+}
+function openCategory(i){
+  const cats=loadStore('categories')||[];
+  currentCategoryIndex=i;
+  document.getElementById('rules-list-title').textContent=cats[i].emoji+' '+cats[i].name;
+  renderRules(i);
+  showView('view-rules-list');
+}
+
+function openAddCategory(){
+  editCatIndex=null;
+  document.getElementById('modal-cat-title').textContent='New category';
+  document.getElementById('modal-cat-desc').textContent='Give this category a name and an emoji';
+  document.getElementById('cat-name-input').value='';
+  document.getElementById('cat-emoji-input').value='';
+  document.getElementById('modal-cat-save-btn').textContent='Add category';
+  document.getElementById('modal-category').classList.add('open');
+  setTimeout(()=>document.getElementById('cat-name-input').focus(),100);
+}
+function openRenameCategory(e,i){
+  e.stopPropagation();
+  const cats=loadStore('categories')||[];
+  editCatIndex=i;
+  document.getElementById('modal-cat-title').textContent='Rename category';
+  document.getElementById('modal-cat-desc').textContent='Update the name or emoji for this category';
+  document.getElementById('cat-name-input').value=cats[i].name;
+  document.getElementById('cat-emoji-input').value=cats[i].emoji||'';
+  document.getElementById('modal-cat-save-btn').textContent='Save changes';
+  document.getElementById('modal-category').classList.add('open');
+  setTimeout(()=>document.getElementById('cat-name-input').focus(),100);
+}
+function saveCategory(){
+  const name=document.getElementById('cat-name-input').value.trim();
+  const emoji=document.getElementById('cat-emoji-input').value.trim()||'📁';
+  if(!name)return;
+  const cats=loadStore('categories')||[];
+  if(editCatIndex===null){
+    cats.push({name,emoji,rules:[]});
+  } else {
+    cats[editCatIndex].name=name;
+    cats[editCatIndex].emoji=emoji;
+    if(currentCategoryIndex===editCatIndex){
+      document.getElementById('rules-list-title').textContent=emoji+' '+name;
+    }
+  }
+  saveStore('categories',cats);closeModals();renderCategories();
+}
+
+function openDeleteCategory(e,i){
+  e.stopPropagation();
+  const cats=loadStore('categories')||[];
+  pendingDeleteCat=i;
+  document.getElementById('delete-cat-msg').textContent=`"${cats[i].name}" and all ${cats[i].rules.length} rule${cats[i].rules.length!==1?'s':''} inside it will be permanently deleted.`;
+  document.getElementById('modal-delete-cat').classList.add('open');
+}
+function confirmDeleteCategory(){
+  const cats=loadStore('categories')||[];
+  cats.splice(pendingDeleteCat,1);
+  saveStore('categories',cats);
+  pendingDeleteCat=null;
+  closeModals();
+  if(currentView==='view-rules-list'&&currentCategoryIndex===pendingDeleteCat){
+    goBack();
+  } else {
+    renderCategories();
+  }
+}
+
+/* ── RULES ── */
+function renderRules(i){
+  const cats=loadStore('categories')||[];
+  const rules=cats[i].rules;
+  document.getElementById('rules-list-subtitle').textContent=`${rules.length} rule${rules.length!==1?'s':''} in this category`;
+  document.getElementById('rules-list').innerHTML=rules.length
+    ? rules.map((r,ri)=>`
+        <div class="rule-item">
+          <div class="rule-bullet"></div>
+          <div class="rule-text">${r}</div>
+          <div class="rule-btns">
+            <button class="icon-btn" title="Edit rule" onclick="openEditRule(${i},${ri})">✏️</button>
+            <button class="icon-btn danger" title="Delete rule" onclick="openDeleteRule(${i},${ri})">🗑</button>
+          </div>
+        </div>`).join('')
+    : `<p style="color:var(--muted);font-size:14px;padding:8px 0">No rules yet. Add one below.</p>`;
+}
+
+function openAddRule(){
+  const cats=loadStore('categories')||[];
+  editRuleIndex=null;
+  document.getElementById('modal-rule-title').textContent='New rule';
+  document.getElementById('modal-rule-desc').textContent=`Adding a rule to ${cats[currentCategoryIndex].name}`;
+  document.getElementById('rule-text-input').value='';
+  document.getElementById('modal-rule-save-btn').textContent='Add rule';
+  document.getElementById('modal-rule').classList.add('open');
+  setTimeout(()=>document.getElementById('rule-text-input').focus(),100);
+}
+function openEditRule(catI,ruleI){
+  const cats=loadStore('categories')||[];
+  editRuleIndex=ruleI;
+  document.getElementById('modal-rule-title').textContent='Edit rule';
+  document.getElementById('modal-rule-desc').textContent=`Editing a rule in ${cats[catI].name}`;
+  document.getElementById('rule-text-input').value=cats[catI].rules[ruleI];
+  document.getElementById('modal-rule-save-btn').textContent='Save changes';
+  document.getElementById('modal-rule').classList.add('open');
+  setTimeout(()=>document.getElementById('rule-text-input').focus(),100);
+}
+function saveRule(){
+  const text=document.getElementById('rule-text-input').value.trim();if(!text)return;
+  const cats=loadStore('categories')||[];
+  if(editRuleIndex===null){cats[currentCategoryIndex].rules.push(text)}
+  else{cats[currentCategoryIndex].rules[editRuleIndex]=text}
+  saveStore('categories',cats);closeModals();renderRules(currentCategoryIndex);
+}
+function openDeleteRule(catI,ruleI){
+  const cats=loadStore('categories')||[];
+  pendingDeleteRule={catI,ruleI};
+  document.getElementById('delete-rule-msg').textContent=`"${cats[catI].rules[ruleI]}" will be permanently deleted.`;
+  document.getElementById('modal-delete-rule').classList.add('open');
+}
+function confirmDeleteRule(){
+  const{catI,ruleI}=pendingDeleteRule;
+  const cats=loadStore('categories')||[];
+  cats[catI].rules.splice(ruleI,1);
+  saveStore('categories',cats);pendingDeleteRule=null;closeModals();renderRules(catI);
+}
+
+/* ── MODALS ── */
+function closeModals(){document.querySelectorAll('.modal-wrap').forEach(m=>m.classList.remove('open'))}
+document.querySelectorAll('.modal-wrap').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
+document.getElementById('cat-name-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveCategory()});
+document.getElementById('rule-text-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveRule()});
+
+/* ── TASKS ── */
+const TASKS_CONFIG=[{id:'kitchen-sweep',name:'Kitchen Sweep',icon:'🧹',desc:'Daily rotation — who sweeps next?'}];
+function renderTasks(){
+  document.getElementById('tasks-list').innerHTML=TASKS_CONFIG.map(t=>`
+    <div class="task-card" id="task-card-${t.id}">
+      <div class="task-card-header" onclick="toggleTask('${t.id}')">
+        <div class="task-icon">${t.icon}</div>
+        <div class="task-info"><h4>${t.name}</h4><span>${t.desc}</span></div>
+        <span class="task-chevron" id="chevron-${t.id}">›</span>
+      </div>
+      <div class="sweep-module" id="sweep-module-${t.id}">
+        <div class="sweep-display">
+          <p>Next to sweep the kitchen floor:</p>
+          <h3 id="sweep-name-${t.id}">Loading…</h3>
+          <div class="deadline">Deadline: <span id="sweep-deadline-${t.id}">—</span><span id="sweep-overdue-${t.id}"></span></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="sweep-btn sweep-btn-primary" id="sweep-log-btn-${t.id}" onclick="showSweepPicker('${t.id}')">Log a new sweep</button>
+        </div>
+        <div id="sweep-picker-${t.id}" style="display:none;margin-top:10px">
+          <div class="sweep-date-row">
+            <input type="date" id="sweep-date-input-${t.id}" max="${new Date().toLocaleDateString('en-CA')}">
+            <button class="sweep-btn sweep-btn-primary" onclick="submitSweep('${t.id}')">Submit</button>
+            <button class="sweep-btn sweep-btn-secondary" onclick="hideSweepPicker('${t.id}')">Cancel</button>
+          </div>
+        </div>
+        <div id="sweep-status-${t.id}" class="sweep-loading" style="display:none">Saving…</div>
+      </div>
+    </div>`).join('');
+}
+function toggleTask(id){
+  const mod=document.getElementById(`sweep-module-${id}`);
+  const chev=document.getElementById(`chevron-${id}`);
+  const open=mod.style.display==='block';
+  mod.style.display=open?'none':'block';chev.textContent=open?'›':'‹';
+  if(!open&&id==='kitchen-sweep')loadSweepData(id);
+}
+function sweepGetDeadline(ds){
+  const m={January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  const p=ds.split(' ');const d=new Date(p[2],m[p[1]],parseInt(p[0]));d.setDate(d.getDate()+3);
+  return`${d.getDate()} ${d.toLocaleDateString('en-US',{month:'short'})} ${d.getFullYear()}`;
+}
+function sweepUpdateOverdue(dl,spanId){
+  const sm={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const p=dl.split(' ');const dd=new Date(p[2],sm[p[1]],parseInt(p[0]));const td=new Date();td.setHours(0,0,0,0);
+  document.getElementById(spanId).innerHTML=dd<td?`<span class="overdue-tag">OVERDUE</span>`:'';
+}
+async function loadSweepData(id){
+  document.getElementById(`sweep-name-${id}`).textContent='Loading…';
+  try{
+    const r=await fetch(`${SWEEP_API}/sweep-data`);const d=await r.json();
+    sweepData={currentIndex:d.current_index,currentDate:d.current_date};
+    const dl=sweepGetDeadline(d.current_date);
+    document.getElementById(`sweep-name-${id}`).textContent=sweepNames[d.current_index];
+    document.getElementById(`sweep-deadline-${id}`).textContent=dl;
+    sweepUpdateOverdue(dl,`sweep-overdue-${id}`);
+  }catch(e){document.getElementById(`sweep-name-${id}`).textContent='Could not load'}
+}
+function showSweepPicker(id){document.getElementById(`sweep-picker-${id}`).style.display='block';document.getElementById(`sweep-log-btn-${id}`).style.display='none'}
+function hideSweepPicker(id){document.getElementById(`sweep-picker-${id}`).style.display='none';document.getElementById(`sweep-log-btn-${id}`).style.display='inline-block';document.getElementById(`sweep-date-input-${id}`).value=''}
+async function submitSweep(id){
+  const input=document.getElementById(`sweep-date-input-${id}`).value;if(!input){alert('Please pick a date');return}
+  const statusEl=document.getElementById(`sweep-status-${id}`);statusEl.style.display='block';statusEl.textContent='Saving…';
+  const d=new Date(input);const fmt=`${d.getDate()} ${d.toLocaleDateString('en-US',{month:'long'})} ${d.getFullYear()}`;
+  const newIndex=(sweepData.currentIndex+1)%sweepNames.length;
+  try{
+    const r=await fetch(`${SWEEP_API}/sweep-data`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_index:newIndex,current_date:fmt})});
+    if(!r.ok)throw new Error();
+    sweepData={currentIndex:newIndex,currentDate:fmt};
+    const dl=sweepGetDeadline(fmt);
+    document.getElementById(`sweep-name-${id}`).textContent=sweepNames[newIndex];
+    document.getElementById(`sweep-deadline-${id}`).textContent=dl;
+    sweepUpdateOverdue(dl,`sweep-overdue-${id}`);hideSweepPicker(id);
+  }catch(e){alert('Failed to save. Please try again.')}
+  statusEl.style.display='none';
+}
+</script>
+</body>
+</html>
